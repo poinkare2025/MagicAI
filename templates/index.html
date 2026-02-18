@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Le Magicien IA - Lecture de Pensée</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+</head>
+
+<body>
+  <div class="stars"></div>
+
+  <div class="container">
+    <!-- Écran d'accueil -->
+    <div id="welcome-screen" class="screen active" aria-hidden="false">
+      <div class="magic-circle" aria-hidden="true">
+        <div class="crystal"></div>
+      </div>
+
+      <h1 class="title glow">Le Magicien IA</h1>
+      <p class="subtitle">Je peux lire dans vos pensées...</p>
+      <p class="instruction">Pensez à un mot, n'importe lequel. Un animal, un objet, un phénomène naturel..</p>
+      <p class="instruction">Je vais vous poser quelques questions et deviner ce à quoi vous pensez.</p>
+
+      <button class="magic-button" type="button" onclick="startGame()">
+        <span>Que commence la Magie!</span>
+        <div class="button-glow" aria-hidden="true"></div>
+      </button>
+    </div>
+
+    <!-- Écran de question -->
+    <div id="question-screen" class="screen" aria-hidden="true">
+      <div class="progress-container" aria-label="Progression">
+        <div class="progress-bar" aria-hidden="true">
+          <div id="progress-fill" class="progress-fill"></div>
+        </div>
+
+        <p class="progress-text" aria-live="polite">
+          Question <span id="question-number">1</span> sur <span id="question-total">7</span>
+        </p>
+      </div>
+
+      <div class="question-card">
+        <!-- Boule de Cristal Magique -->
+        <div class="crystal-ball-container" aria-hidden="true">
+          <!-- Particules flottantes -->
+          <div class="floating-particles">
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+          </div>
+          
+          <!-- Boule de cristal -->
+          <div class="crystal-sphere">
+            <!-- Reflet -->
+            <div class="crystal-highlight"></div>
+            
+            <!-- Brume intérieure -->
+            <div class="crystal-mist"></div>
+            
+            <!-- Symboles magiques -->
+            <div class="magic-symbols">
+              <div class="symbol">✨</div>
+              <div class="symbol">★</div>
+              <div class="symbol">◆</div>
+            </div>
+          </div>
+          
+          <!-- Socle -->
+          <div class="crystal-base"></div>
+        </div>
+
+        <!-- aria-live pour que la question soit annoncée quand elle change -->
+        <h2 id="question-text" class="question-text" aria-live="polite"></h2>
+
+        <div class="answer-buttons" role="group" aria-label="Réponses">
+          <button class="answer-button yes-button" type="button" onclick="answerQuestion(true)">
+            <span>Oui</span>
+            <div class="button-glow" aria-hidden="true"></div>
+          </button>
+
+          <button class="answer-button no-button" type="button" onclick="answerQuestion(false)">
+            <span>Non</span>
+            <div class="button-glow" aria-hidden="true"></div>
+          </button>
+
+          <button class="answer-button maybe-button" type="button" onclick="answerQuestion(null)">
+            <span>Je ne sais pas</span>
+            <div class="button-glow" aria-hidden="true"></div>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Écran de prédiction -->
+    <div id="prediction-screen" class="screen" aria-hidden="true">
+      <div class="revelation-container">
+        <div class="magic-circle large" aria-hidden="true">
+          <div class="crystal large"></div>
+        </div>
+
+        <h2 class="revelation-title">Je vois...</h2>
+        <h1 id="predicted-word" class="predicted-word glow" aria-live="polite"></h1>
+
+        <div class="alternatives" id="alternatives-container" style="display:none;">
+          <p class="alternatives-label">Ou peut-être :</p>
+          <div id="alternatives-list"></div>
+        </div>
+
+        <div class="feedback-section">
+          <p class="feedback-question">Ai-je deviné correctement ?</p>
+          <div class="feedback-buttons" role="group" aria-label="Feedback">
+            <button class="feedback-button correct" type="button" onclick="giveFeedback(true)">
+              <span>✨ Oui, incroyable !</span>
+            </button>
+            <button class="feedback-button incorrect" type="button" onclick="giveFeedback(false)">
+              <span>Non, c'était autre chose</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Écran de feedback -->
+    <div id="feedback-screen" class="screen" aria-hidden="true">
+      <div class="feedback-result">
+        <div class="magic-circle" aria-hidden="true">
+          <div class="crystal"></div>
+        </div>
+
+        <h2 id="feedback-title" class="feedback-title" aria-live="polite"></h2>
+        <p id="feedback-message" class="feedback-message" aria-live="polite"></p>
+
+        <!-- Bloc saisi mot réel (affiché seulement si incorrect) -->
+        <div id="actual-word-block" style="display:none; margin-top: 16px;">
+          <p style="margin-bottom:8px;">Alors… à quoi pensais-tu ?</p>
+
+          <input
+            id="actual-word-input"
+            type="text"
+            placeholder="Ex: moustique, télécommande, montagne..."
+            autocomplete="off"
+            autocapitalize="none"
+            spellcheck="false"
+            style="padding:10px; border-radius:10px; width: 100%; max-width: 360px;"
+          />
+
+          <button class="magic-button" type="button" style="margin-top:10px;" onclick="submitActualWord()">
+            <span>Envoyer</span>
+            <div class="button-glow" aria-hidden="true"></div>
+          </button>
+        </div>
+
+        <button class="magic-button" type="button" onclick="restartGame()">
+          <span>Réessayer</span>
+          <div class="button-glow" aria-hidden="true"></div>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- IMPORTANT : app.js expose startGame/answerQuestion/etc. sur window -->
+  <script src="{{ url_for('static', filename='js/app.js') }}" defer></script>
+
+  <!-- Optionnel : si JS désactivé -->
+  <noscript>
+    <div style="padding:16px; text-align:center;">
+      Cette application nécessite JavaScript pour fonctionner.
+    </div>
+  </noscript>
+</body>
+</html>
